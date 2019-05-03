@@ -11,6 +11,18 @@ type TileType = "empty" | "busyroad" | "road" | "house" | "apartment" | "smallbu
 
 interface ITile extends entity {
     type: TileType,
+
+
+}
+
+type UnitType = "person" | "car";
+
+interface IUnit extends entity {
+    type: UnitType;
+
+    nextTile?: ITile;
+    lastTile: ITile;
+    // probably should say where they are going? or nah?
 }
 
 export class GameBoard extends React.Component {
@@ -33,6 +45,8 @@ export class GameBoard extends React.Component {
     private newTiles: ITile[] = [];
     private gridTiles: { [key: string]: ITile } = {};
 
+    private allUnits: IUnit[] = [];
+
     private getTile = (x: number, y: number, addMissing: boolean): ITile | undefined => {
         var tile = this.gridTiles[x + "," + y];
         if (!tile && addMissing) {
@@ -52,7 +66,6 @@ export class GameBoard extends React.Component {
     }
 
     private drawTile = (tile: ITile, ctx: CanvasRenderingContext2D) => {
-        // eslint-disable-next-line
         switch (tile.type) {
             case "water":
                 ctx.fillStyle = "blue";
@@ -105,31 +118,31 @@ export class GameBoard extends React.Component {
     private seedWater = () => {
         for (var x = this.size * -.5; x < this.size * 1.5; x++) {
             for (var y = this.size * -.5; y < this.size * 1.5; y++) {
-                if(Math.random() < .002){
-                    this.setTile(x,y, {x,y, type: "water"});
-                    this.getNeighbors(x,y,true);
+                if (Math.random() < .002) {
+                    this.setTile(x, y, { x, y, type: "water" });
+                    this.getNeighbors(x, y, true);
                 }
             }
         }
         this.addNewTiles();
 
-        for(var i = 0; i < 5; i++){
+        for (var i = 0; i < 5; i++) {
             this.allTiles.forEach(x => {
-                if(x.type=="empty"){
+                if (x.type == "empty") {
                     var neighbors = this.getNeighbors(x.x, x.y, true);
                     var counts = this.getTypes(neighbors);
-    
-                    if(counts["water"] > 2){
-                        if(Math.random() < .33){
+
+                    if (counts["water"] > 2) {
+                        if (Math.random() < .33) {
                             x.type = "water";
                         }
                     }
-                    else if(counts["water"] > 1){
-                        if(Math.random() < .25){
+                    else if (counts["water"] > 1) {
+                        if (Math.random() < .25) {
                             x.type = "water";
                         }
                     }
-                    else if(Math.random() < .05){
+                    else if (Math.random() < .05) {
                         x.type = "water";
                     }
                 }
@@ -142,10 +155,10 @@ export class GameBoard extends React.Component {
     private seedNature = () => {
         for (var x = 0; x < this.size; x++) {
             for (var y = 0; y < this.size; y++) {
-                if(!this.getTile(x,y, false)){
-                    if(Math.random() < .005){
-                        this.setTile(x,y, {x,y, type: "nature"});
-                        this.getNeighbors(x,y,true);
+                if (!this.getTile(x, y, false)) {
+                    if (Math.random() < .005) {
+                        this.setTile(x, y, { x, y, type: "nature" });
+                        this.getNeighbors(x, y, true);
                     }
                 }
             }
@@ -153,18 +166,18 @@ export class GameBoard extends React.Component {
 
         this.addNewTiles();
 
-        for(var i = 0; i < 7; i++){
+        for (var i = 0; i < 7; i++) {
             this.allTiles.forEach(x => {
-                if(x.type=="empty"){
+                if (x.type == "empty") {
                     var neighbors = this.getNeighbors(x.x, x.y, true);
                     var counts = this.getTypes(neighbors);
-    
-                    if(counts["water"] > 2 || counts["nature"] > 2){
-                        if(Math.random() < .33){
+
+                    if (counts["water"] > 2 || counts["nature"] > 2) {
+                        if (Math.random() < .33) {
                             x.type = "nature";
                         }
                     }
-                    else if(Math.random() < .05){
+                    else if (Math.random() < .05) {
                         x.type = "nature";
                     }
                 }
@@ -179,8 +192,8 @@ export class GameBoard extends React.Component {
         var j = Math.floor((this.size * .25) + Math.random() * (this.size * .25));
         var i2 = Math.floor((i + this.size / 7) + Math.random() * (this.size * .5));
         var j2 = Math.floor((j + this.size / 7) + Math.random() * (this.size * .5));
-        console.log(i + ","+ j);
-        console.log(i2 + ","+ j2);
+        console.log(i + "," + j);
+        console.log(i2 + "," + j2);
 
         this.centerX = j;
         this.centerY = i;
@@ -190,11 +203,11 @@ export class GameBoard extends React.Component {
                 if (x === j || y === i || x === j2 || y === i2) {
                     let tile: ITile = { type: "road", x, y };
 
-                    var existingtile = this.getTile(x,y,false);
-                    if(existingtile){
+                    var existingtile = this.getTile(x, y, false);
+                    if (existingtile) {
                         existingtile.type = "road";
                     }
-                    else{
+                    else {
                         this.setTile(x, y, tile);
                     }
                 }
@@ -202,11 +215,20 @@ export class GameBoard extends React.Component {
         }
 
         this.getTile(j, i, false)!.type = "busyroad";
-        this.getNeighbors(j, i, false).forEach(t => {
+        this.getCloseNeighbors(j, i, false).forEach(t => {
             if (t) {
                 t.type = "busyroad";
             }
         });
+    }
+
+    private getCloseNeighbors = (x: number, y: number, addMissing: boolean): (ITile | undefined)[] => {
+        return [
+            this.getTile(x - 1, y, addMissing),
+            this.getTile(x, y - 1, addMissing),
+            this.getTile(x + 1, y, addMissing),
+            this.getTile(x, y + 1, addMissing),
+        ];
     }
 
     private getNeighbors = (x: number, y: number, addMissing: boolean): (ITile | undefined)[] => {
@@ -239,7 +261,7 @@ export class GameBoard extends React.Component {
             if (t) {
                 counts[t.type] = counts[t.type] || 0;
                 counts[t.type]++;
-                if(t.type != "empty" && t.type != "water" && t.type != "nature"){
+                if (t.type != "empty" && t.type != "water" && t.type != "nature") {
                     counts["any"]++;
                 }
             }
@@ -260,12 +282,12 @@ export class GameBoard extends React.Component {
             var initialType = tile.type;
             switch (tile.type) {
                 case "nature":
-                // slowly clear nature if devloped nearby?
-                if(counts["any"] >= 1){
-                    if(Math.random() < .1){
-                        tile.type = "empty";
+                    // slowly clear nature if devloped nearby?
+                    if (counts["any"] >= 1) {
+                        if (Math.random() < .1) {
+                            tile.type = "empty";
+                        }
                     }
-                }
                 case "empty":
                     if (counts["busyroad"] > 2) {
                         if (Math.random() < .025) {
@@ -379,13 +401,26 @@ export class GameBoard extends React.Component {
 
                     break;
 
+                case "busyroad":
+                    if (counts["road"] + counts["busyroad"] == 8) {
+                        if (Math.random() < .25) {
+                            tile.type = "downtown";
+                        }
+                    }
+
+                    break;
                 case "road":
+                    if (counts["road"] + counts["busyroad"] == 8) {
+                        if (Math.random() < .1) {
+                            tile.type = "downtown";
+                        }
+                    }
                     if (counts["downtown"] >= 1) {
                         if (Math.random() < .01) {
                             tile.type = "busyroad";
                         }
                     }
-                    if (counts["busyroad"] == 1) {
+                    if (counts["busyroad"] <= 2) {
                         // only straight lines
                         if ((neighbors[0] && neighbors[0]!.type == "busyroad")
                             || (neighbors[2] && neighbors[2]!.type == "busyroad")
@@ -429,19 +464,182 @@ export class GameBoard extends React.Component {
         this.updateTiles();
         this.addNewTiles();
 
-        if(this.currentSteps < this.generationSteps){
+        if (this.currentSteps < this.generationSteps) {
             this.currentSteps++;
             setTimeout(this.runStep, 50);
         }
-        else{
-            console.log("done!");
+        else {
+            console.log("done making terrain, starting a DAY!");
+            this.startRunningDay();
         }
+    }
+    private moveUnits = () => {
+        this.allUnits.forEach(unit => {
+            var stepSize = 1 / this.animationsPerCarTile;
+            var goalX = unit.nextTile!.x;
+            var goalY = unit.nextTile!.y;
+            //console.log("moving");
+            //console.log("unit: " + unit.x + "," + unit.y);
+            //console.log("goal: " + goalX + "," + goalY);
+
+            if (goalX >= unit.x + stepSize) {
+                unit.x += stepSize;
+            }
+            else if (goalX <= unit.x - stepSize) {
+                unit.x -= stepSize;
+            }
+            else {
+                unit.x = goalX;
+            }
+
+            if (goalY >= unit.y + stepSize) {
+                unit.y += stepSize;
+            }
+            else if (goalY <= unit.y - stepSize) {
+                unit.y -= stepSize;
+            }
+            else {
+                unit.y = goalY;
+            }
+        });
+    }
+
+    private updateUnits = () => {
+        this.allUnits.forEach(unit => {
+            // this is wrong for moving.
+            // actually use the NEXT tile. since this is where it actually moved TO
+            //var unitX = Math.floor(unit.x);
+            //var unitY = Math.floor(unit.y);
+
+            if(unit.nextTile){
+                unit.x = unit.nextTile.x;
+                unit.y = unit.nextTile.y;
+            }
+
+            var unitX = unit.x
+            var unitY = unit.y;
+
+            //console.log("deciding");
+            //console.log("current: " + ((unit.nextTile && unit.nextTile.x) || "X") +"," + ((unit.nextTile && unit.nextTile.y) || "Y"));
+            //console.log("last: " + unit.lastTile!.x +"," + unit.lastTile!.y);
+
+            var difX = unitX - unit.lastTile.x;
+            var difY = unitY - unit.lastTile.y;
+
+            var straightX = unitX + difX;
+            var straightY = unitY + difY;
+
+            var neighbors = this.getCloseNeighbors(unit.x, unit.y, false);
+            var straightRoad = neighbors.filter(n =>
+                n
+                && (n.type == "road" || n.type == "busyroad")
+                && n.x == straightX
+                && n.y == straightY);
+
+            var nextRoad = unit.lastTile;
+            if (straightRoad[0] && Math.random() < .9) {
+                nextRoad = straightRoad[0]!;
+            }
+            else {
+                var roads = neighbors.filter(n => (n && n != unit.lastTile && (n.type == "road" || n.type == "busyroad")));
+                if (roads.length > 0) {
+                    var i = Math.round(Math.random() * (roads.length - 1));
+                    nextRoad = roads[i]!;
+                }
+            }
+
+            // find a neighboring road, try to avoid the previous tile if possible, but if no others use it
+
+            // better to.. go straight...
+            unit.nextTile = nextRoad;
+            //unit.x = unit.nextTile!.x;
+            //unit.y = unit.nextTile!.y;
+
+            unit.lastTile = this.getTile(unitX, unitY, false)!;
+
+        });
+    }
+
+    private startRunningDay = () => {
+        var x = false;
+        this.allTiles.forEach(t => {
+            // just spawn one for now
+            if (!x && t.type == "house") {
+                var neighbors = this.getCloseNeighbors(t.x, t.y, false);
+                var counts = this.getTypes(neighbors);
+                if (counts["road"] + counts["busyroad"] > 0) {
+                    //x = true;
+                    // spawn a car
+                    this.allUnits.push({ type: "car", x: t.x, y: t.y, lastTile: t });
+                }
+            }
+        });
+
+        this.runDay();
+    }
+
+    private drawUnit = (unit: IUnit, ctx: CanvasRenderingContext2D) => {
+        ctx.fillStyle = "magenta";
+        var vTileSize = this.tileSize * this.scale;
+
+        var offsetX = .5;
+        var offsetY = .5;
+/*
+        if(unit.nextTile && unit.nextTile.x > unit.lastTile.x){
+            // going right, offset y
+            offsetY = .75;
+        }
+        else if(unit.nextTile && unit.nextTile.x < unit.lastTile.x){
+            // going left, offset y
+            offsetY = .25;
+        }
+        
+        if(unit.nextTile && unit.nextTile.y > unit.lastTile.y){
+            // going up, offset y
+            offsetX = .75;
+        }
+        else if(unit.nextTile && unit.nextTile.y < unit.lastTile.y){
+            // going left, offset y
+            offsetX = .25;
+        }
+*/
+
+        var vTileX = ((unit.x + offsetX - this.centerX)) * vTileSize + (this.canvasSize / 2);
+        var vTileY = ((unit.y + offsetY - this.centerY)) * vTileSize + (this.canvasSize / 2);
+
+        var vRadius = unit.type == "car" ? .3 * this.tileSize : .1 * this.tileSize;
+        ctx.fillRect(vTileX, vTileY, vRadius, vRadius);
+    }
+
+    private drawAllUnits = () => {
+        this.allUnits.forEach(u => this.drawUnit(u, this.ctx!));
+    }
+
+    private animationsPerCarTile = 10;
+    private currentAnimationStep = 0;
+
+    private runDay = () => {
+        if (this.currentAnimationStep == 0) {
+            this.updateUnits();
+        }
+        else {
+            this.moveUnits();
+        }
+
+        this.currentAnimationStep++;
+        if (this.currentAnimationStep > this.animationsPerCarTile) { this.currentAnimationStep = 0; }
+
+        // animate X times?
+
+        this.clearMap();
+        setTimeout(this.runDay, 10);
     }
 
     private clearMap = () => {
         this.ctx!.fillStyle = "green";
         this.ctx!.fillRect(0, 0, this.canvasSize, this.canvasSize);
         this.drawAllTiles();
+        this.drawAllUnits();
     }
 
     private dragging = false;
@@ -449,10 +647,9 @@ export class GameBoard extends React.Component {
     private startY = 0;
 
     render() {
-        var realSize = this.size * this.tileSize;
         return <div>
             <div>
-                <button onClick={() => { setTimeout(this.runStep, 50); }}>STEP</button>
+                <button onClick={() => { this.runDay() }}>STEP</button>
                 <button onClick={() => { this.scale *= 1.1; this.clearMap(); }}>+</button>
                 <button onClick={() => { this.scale *= .9; this.clearMap(); }}>-</button>
             </div>
@@ -469,15 +666,16 @@ export class GameBoard extends React.Component {
                 }}
                 width={this.canvasSize.toString()}
                 height={this.canvasSize.toString()}
-                style={{ height: this.canvasSize + "px", width: this.canvasSize + "px" }} ref={c => {
+                style={{ height: this.canvasSize + "px", width: this.canvasSize + "px" }}
+                ref={c => {
                     if (!this.canvas && c) {
                         this.canvas = c;
                         this.ctx = this.canvas!.getContext("2d");
 
                         this.seedWater();
                         this.seedNature();
-
                         this.seedRoads();
+
                         this.addNewTiles();
                         this.clearMap();
 
