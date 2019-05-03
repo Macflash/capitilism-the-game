@@ -7,12 +7,15 @@ interface entity {
     //onDraw: (ctx: CanvasRenderingContext2D) => void;
 }
 
-type TileType = "empty" | "busyroad" | "road" | "house" | "apartment" | "smallbusiness" | "shoppingcenter" | "downtown" | "water" | "nature";
+type TileType = "yourbusiness" | "empty" | "busyroad" | "road" | "house" | "apartment" | "smallbusiness" | "shoppingcenter" | "downtown" | "water" | "nature";
+
+interface IBusiness extends ITile {
+    range: number,
+    good: "Food" | "Coffee" | "Gas",
+}
 
 interface ITile extends entity {
     type: TileType,
-
-
 }
 
 type UnitType = "person" | "car";
@@ -22,11 +25,13 @@ interface IUnit extends entity {
 
     nextTile?: ITile;
     lastTile: ITile;
-    // probably should say where they are going? or nah?
+
+    
 }
 
 export class GameBoard extends React.Component {
     private tileSize = 10;
+    private money = 100;
 
     private currentSteps = 0;
     private generationSteps = 100;
@@ -67,6 +72,9 @@ export class GameBoard extends React.Component {
 
     private drawTile = (tile: ITile, ctx: CanvasRenderingContext2D) => {
         switch (tile.type) {
+            case "yourbusiness":
+                ctx.fillStyle = "purple";
+                break;
             case "water":
                 ctx.fillStyle = "blue";
                 break;
@@ -107,7 +115,8 @@ export class GameBoard extends React.Component {
             Math.floor(vTileX),
             Math.floor(vTileY),
             Math.ceil(vTileSize),
-            Math.ceil(vTileSize));
+            Math.ceil(vTileSize)
+        );
     }
 
     constructor(props: Readonly<{}>) {
@@ -511,7 +520,7 @@ export class GameBoard extends React.Component {
             //var unitX = Math.floor(unit.x);
             //var unitY = Math.floor(unit.y);
 
-            if(unit.nextTile){
+            if (unit.nextTile) {
                 unit.x = unit.nextTile.x;
                 unit.y = unit.nextTile.y;
             }
@@ -530,6 +539,27 @@ export class GameBoard extends React.Component {
             var straightY = unitY + difY;
 
             var neighbors = this.getCloseNeighbors(unit.x, unit.y, false);
+
+            // BUY
+            if(neighbors.some(n => !!n && n.type == "yourbusiness")){
+                console.log("customer!");
+                if(Math.random() < .35){
+                    // sell!
+                    // TODO: draw a line! 
+                    /*
+                    this.ctx!.beginPath();
+                    this.ctx!.strokeStyle = "1px solid purple";
+                    this.ctx!.moveTo(unitX, unitY);
+                    this.ctx!.lineTo(unitX, unitY);
+                    this.ctx!.stroke();
+                    this.ctx!.closePath(); */
+
+                    this.money += 10;
+                    console.log("SOLD! $" +this.money);
+                }
+            }
+
+            // MOVE
             var straightRoad = neighbors.filter(n =>
                 n
                 && (n.type == "road" || n.type == "busyroad")
@@ -561,16 +591,32 @@ export class GameBoard extends React.Component {
     }
 
     private startRunningDay = () => {
-        var x = false;
+        var onlyOneCar = false;
+        var onlyOneBusiness = false;
         this.allTiles.forEach(t => {
             // just spawn one for now
-            if (!x && t.type == "house") {
+            if (!onlyOneCar && t.type == "house") {
                 var neighbors = this.getCloseNeighbors(t.x, t.y, false);
                 var counts = this.getTypes(neighbors);
                 if (counts["road"] + counts["busyroad"] > 0) {
                     //x = true;
                     // spawn a car
                     this.allUnits.push({ type: "car", x: t.x, y: t.y, lastTile: t });
+                }
+            }
+        });
+
+        this.allTiles.forEach(t => {
+            // just spawn one for now
+            if (!onlyOneBusiness && t.type == "shoppingcenter" && Math.random() < .1) {
+                var neighbors = this.getCloseNeighbors(t.x, t.y, false);
+                var counts = this.getTypes(neighbors);
+                if (counts["road"] + counts["busyroad"] > 0) {
+                    onlyOneBusiness = true;
+                    t.type = "yourbusiness";
+                    this.centerX = t.x;
+                    this.centerY = t.y;
+                    this.scale = 3;
                 }
             }
         });
@@ -584,25 +630,25 @@ export class GameBoard extends React.Component {
 
         var offsetX = .5;
         var offsetY = .5;
-/*
-        if(unit.nextTile && unit.nextTile.x > unit.lastTile.x){
-            // going right, offset y
-            offsetY = .75;
-        }
-        else if(unit.nextTile && unit.nextTile.x < unit.lastTile.x){
-            // going left, offset y
-            offsetY = .25;
-        }
-        
-        if(unit.nextTile && unit.nextTile.y > unit.lastTile.y){
-            // going up, offset y
-            offsetX = .75;
-        }
-        else if(unit.nextTile && unit.nextTile.y < unit.lastTile.y){
-            // going left, offset y
-            offsetX = .25;
-        }
-*/
+        /*
+                if(unit.nextTile && unit.nextTile.x > unit.lastTile.x){
+                    // going right, offset y
+                    offsetY = .75;
+                }
+                else if(unit.nextTile && unit.nextTile.x < unit.lastTile.x){
+                    // going left, offset y
+                    offsetY = .25;
+                }
+                
+                if(unit.nextTile && unit.nextTile.y > unit.lastTile.y){
+                    // going up, offset y
+                    offsetX = .75;
+                }
+                else if(unit.nextTile && unit.nextTile.y < unit.lastTile.y){
+                    // going left, offset y
+                    offsetX = .25;
+                }
+        */
 
         var vTileX = ((unit.x + offsetX - this.centerX)) * vTileSize + (this.canvasSize / 2);
         var vTileY = ((unit.y + offsetY - this.centerY)) * vTileSize + (this.canvasSize / 2);
@@ -626,6 +672,9 @@ export class GameBoard extends React.Component {
             this.moveUnits();
         }
 
+        // do the shooty thing?
+
+
         this.currentAnimationStep++;
         if (this.currentAnimationStep > this.animationsPerCarTile) { this.currentAnimationStep = 0; }
 
@@ -640,6 +689,8 @@ export class GameBoard extends React.Component {
         this.ctx!.fillRect(0, 0, this.canvasSize, this.canvasSize);
         this.drawAllTiles();
         this.drawAllUnits();
+
+        // draw circle around the base
     }
 
     private dragging = false;
