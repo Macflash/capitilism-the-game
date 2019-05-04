@@ -541,18 +541,23 @@ export class GameBoard extends React.Component {
             var neighbors = this.getCloseNeighbors(unit.x, unit.y, false);
 
             // BUY
-            if(neighbors.some(n => !!n && n.type == "yourbusiness")){
+            var business = neighbors.filter(n => !!n && n.type == "yourbusiness");
+            if(business.length > 0){
                 console.log("customer!");
                 if(Math.random() < .35){
                     // sell!
                     // TODO: draw a line! 
-                    /*
+                    
+                    var unitSpot = this.convertToScreenSpace(unit, .5, .5);
+                    var businessSpot = this.convertToScreenSpace(business[0]!, .5, .5);
+
                     this.ctx!.beginPath();
-                    this.ctx!.strokeStyle = "1px solid purple";
-                    this.ctx!.moveTo(unitX, unitY);
-                    this.ctx!.lineTo(unitX, unitY);
+                    this.ctx!.lineWidth = 2;
+                    this.ctx!.strokeStyle = "gold";
+                    this.ctx!.moveTo(unitSpot.x, unitSpot.y);
+                    this.ctx!.lineTo(businessSpot.x, businessSpot.y);
                     this.ctx!.stroke();
-                    this.ctx!.closePath(); */
+                    this.ctx!.closePath();
 
                     this.money += 10;
                     console.log("SOLD! $" +this.money);
@@ -664,7 +669,16 @@ export class GameBoard extends React.Component {
     private animationsPerCarTile = 10;
     private currentAnimationStep = 0;
 
+    private convertToScreenSpace = (tile: entity, offsetX: number = 0, offsetY: number = 0): entity => {
+        var vTileSize = this.tileSize * this.scale;
+        var vTileX = ((tile.x + offsetX - this.centerX)) * vTileSize + (this.canvasSize / 2);
+        var vTileY = ((tile.y + offsetY - this.centerY)) * vTileSize + (this.canvasSize / 2);
+
+        return {x: vTileX, y: vTileY};
+    }
+
     private runDay = () => {
+        this.clearMap();
         if (this.currentAnimationStep == 0) {
             this.updateUnits();
         }
@@ -674,13 +688,11 @@ export class GameBoard extends React.Component {
 
         // do the shooty thing?
 
-
         this.currentAnimationStep++;
         if (this.currentAnimationStep > this.animationsPerCarTile) { this.currentAnimationStep = 0; }
 
         // animate X times?
 
-        this.clearMap();
         setTimeout(this.runDay, 10);
     }
 
