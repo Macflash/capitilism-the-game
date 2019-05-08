@@ -1,24 +1,18 @@
 import React from 'react';
-import downtown from './images/downtown.png';
-import house from './images/house.png';
 import { ImageManager } from './imageManager';
+import { Road } from './tiles/road';
+import { ITile } from './tiles/tile';
 
-interface entity {
+export interface entity {
     x: number;
     y: number;
 
     //onDraw: (ctx: CanvasRenderingContext2D) => void;
 }
 
-type TileType = "yourbusiness" | "empty" | "busyroad" | "road" | "house" | "apartment" | "smallbusiness" | "shoppingcenter" | "downtown" | "water" | "nature";
-
 interface IBusiness extends ITile {
     range: number,
     good: "Food" | "Coffee" | "Gas",
-}
-
-interface ITile extends entity {
-    type: TileType,
 }
 
 type UnitType = "person" | "car";
@@ -28,8 +22,6 @@ interface IUnit extends entity {
 
     nextTile?: ITile;
     lastTile: ITile;
-
-
 }
 
 export class GameBoard extends React.Component {
@@ -101,11 +93,9 @@ export class GameBoard extends React.Component {
             case "road":
                 // we should check the TYPE of road.
                 var t = this.getCloseNeighbors(tile.x, tile.y, false);
-                var c = this.getTypes(t);
 
-                if(c.road <= 2){image = this.imageManager.GetImage("road_straight")}
-                if(c.road+c.busyroad > 2){image = this.imageManager.GetImage("road_intersection")}
-
+                image = Road.GetImage(t);
+                
                 ctx.fillStyle = "grey";
                 break;
             case "busyroad":
@@ -154,10 +144,6 @@ export class GameBoard extends React.Component {
     constructor(props: Readonly<{}>) {
         super(props);
         this.state = {};
-
-        this.house.src = house;
-        this.house.width = 500;
-        this.house.height = 500;
     }
 
     private seedWater = () => {
