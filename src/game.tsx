@@ -1,4 +1,6 @@
 import React from 'react';
+import downtown from './images/downtown.png';
+import house from './images/house.png';
 
 interface entity {
     x: number;
@@ -51,6 +53,8 @@ export class GameBoard extends React.Component {
     private gridTiles: { [key: string]: ITile } = {};
 
     private allUnits: IUnit[] = [];
+
+    private house = document.createElement("img");
 
     private getTile = (x: number, y: number, addMissing: boolean): ITile | undefined => {
         var tile = this.gridTiles[x + "," + y];
@@ -117,11 +121,19 @@ export class GameBoard extends React.Component {
             Math.ceil(vTileSize),
             Math.ceil(vTileSize)
         );
+
+        if(tile.type == "house"){
+            ctx.drawImage(this.house, vTileX, vTileY, vTileSize, vTileSize);
+        }
     }
 
     constructor(props: Readonly<{}>) {
         super(props);
         this.state = {};
+
+        this.house.src = house;
+        this.house.width = 500;
+        this.house.height = 500;
     }
 
     private seedWater = () => {
@@ -543,7 +555,6 @@ export class GameBoard extends React.Component {
             // BUY
             var business = neighbors.filter(n => !!n && n.type == "yourbusiness");
             if(business.length > 0){
-                console.log("customer!");
                 if(Math.random() < .35){
                     // sell!
                     // TODO: draw a line! 
