@@ -9,10 +9,25 @@ export interface ITile extends entity {
 export type Neighbors = (ITile | undefined)[];
 
 export class Tile {
-    public static GetTileExtension(type: TileType, neighbors: Neighbors): string {
+    public static GetSingleTileExtension(type: TileType, neighbors: Neighbors): string {
         var extension: string[] = [];
         neighbors.forEach(t => {
             if (t && t.type == type) {
+                extension.push("1");
+            }
+            else {
+                extension.push("0");
+            }
+        });
+
+        return extension.join("_");
+    }
+
+    
+    public static GetMultiTileExtension(types: TileType[], neighbors: Neighbors): string {
+        var extension: string[] = [];
+        neighbors.forEach(t => {
+            if (t && types.indexOf(t.type) >= 0) {
                 extension.push("1");
             }
             else {

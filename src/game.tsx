@@ -1,7 +1,7 @@
 import React from 'react';
 import { ImageManager } from './imageManager';
 import { Road } from './tiles/road';
-import { ITile } from './tiles/tile';
+import { ITile, Tile, TileType } from './tiles/tile';
 
 export interface entity {
     x: number;
@@ -79,7 +79,10 @@ export class GameBoard extends React.Component {
     }
 
     private drawTile = (tile: ITile, ctx: CanvasRenderingContext2D) => {
-        let image = this.imageManager.GetImage(tile.type);
+        var t = this.getCloseNeighbors(tile.x, tile.y, false);
+
+        let image = this.imageManager.GetImage(tile.type + "_" + Tile.GetSingleTileExtension(tile.type, t))
+        || this.imageManager.GetImage(tile.type);
         switch (tile.type) {
             case "yourbusiness":
                 ctx.fillStyle = "purple";
@@ -92,10 +95,8 @@ export class GameBoard extends React.Component {
                 break;
             case "road":
                 // we should check the TYPE of road.
-                var t = this.getCloseNeighbors(tile.x, tile.y, false);
-
                 image = Road.GetImage(t);
-                
+
                 ctx.fillStyle = "grey";
                 break;
             case "busyroad":
@@ -441,6 +442,11 @@ export class GameBoard extends React.Component {
 
                     break;
                 case "road":
+                    if (counts["road"] + counts["busyroad"] == 0) {
+                        if (Math.random() < .5) {
+                            tile.type = "empty";
+                        }
+                    }
                     if (counts["road"] + counts["busyroad"] == 8) {
                         if (Math.random() < .1) {
                             tile.type = "downtown";
@@ -487,8 +493,8 @@ export class GameBoard extends React.Component {
         // order based on the location...
         for (var x = this.minTile; x < this.maxTile; x++) {
             for (var y = this.minTile; y < this.maxTile; y++) {
-                let t = this.getTile(x,y, false);
-                if(t){
+                let t = this.getTile(x, y, false);
+                if (t) {
                     this.drawTile(t, this.ctx!);
                 }
             }

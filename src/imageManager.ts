@@ -9,6 +9,7 @@ import water from "./images/water.png";
 import nature from "./images/tree.png";
 import busyroad from "./images/busy_4.png";
 
+// ROADS
 import road_1_1_1_1 from "./images/road/road_1_1_1_1.png";
 
 import road_1_0_0_0 from "./images/road/road_1_0_0_0.png";
@@ -28,6 +29,27 @@ import road_1_0_0_1 from "./images/road/road_1_0_0_1.png";
 
 import road_1_0_1_0 from "./images/road/road_1_0_1_0.png";
 import road_0_1_0_1 from "./images/road/road_0_1_0_1.png";
+
+// WATER
+import water_1_1_1_1 from "./images/water/water_1_1_1_1.png";
+
+import water_1_0_0_0 from "./images/water/water_1_0_0_0.png";
+import water_0_1_0_0 from "./images/water/water_0_1_0_0.png";
+import water_0_0_1_0 from "./images/water/water_0_0_1_0.png";
+import water_0_0_0_1 from "./images/water/water_0_0_0_1.png";
+
+import water_0_1_1_1 from "./images/water/water_0_1_1_1.png";
+import water_1_0_1_1 from "./images/water/water_1_0_1_1.png";
+import water_1_1_0_1 from "./images/water/water_1_1_0_1.png";
+import water_1_1_1_0 from "./images/water/water_1_1_1_0.png";
+
+import water_0_0_1_1 from "./images/water/water_0_0_1_1.png";
+import water_0_1_1_0 from "./images/water/water_0_1_1_0.png";
+import water_1_1_0_0 from "./images/water/water_1_1_0_0.png";
+import water_1_0_0_1 from "./images/water/water_1_0_0_1.png";
+
+import water_1_0_1_0 from "./images/water/water_1_0_1_0.png";
+import water_0_1_0_1 from "./images/water/water_0_1_0_1.png";
 
 const Images = {
     tile,
@@ -57,6 +79,23 @@ const Images = {
     road_0_1_0_0,
     road_0_0_1_0,
     road_0_0_0_1,
+
+     // Basic water
+     water_1_1_1_1,
+     water_0_1_1_1,
+     water_1_0_1_1,
+     water_1_1_0_1,
+     water_1_1_1_0,
+     water_0_0_1_1,
+     water_0_1_1_0,
+     water_1_1_0_0,
+     water_1_0_0_1,
+     water_1_0_1_0,
+     water_0_1_0_1,
+     water_1_0_0_0,
+     water_0_1_0_0,
+     water_0_0_1_0,
+     water_0_0_0_1,
 }
 
 const elements: { [key: string]: HTMLImageElement } = {};
