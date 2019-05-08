@@ -1,6 +1,7 @@
 import React from 'react';
 import downtown from './images/downtown.png';
 import house from './images/house.png';
+import { ImageManager } from './imageManager';
 
 interface entity {
     x: number;
@@ -28,7 +29,7 @@ interface IUnit extends entity {
     nextTile?: ITile;
     lastTile: ITile;
 
-    
+
 }
 
 export class GameBoard extends React.Component {
@@ -41,7 +42,7 @@ export class GameBoard extends React.Component {
     /** Starting size */
     private size = 50;
 
-    private scale = 1;
+    private scale = 5;
     private centerX = this.size / 2;
     private centerY = this.size / 2;
     private canvasSize = 800;
@@ -54,7 +55,13 @@ export class GameBoard extends React.Component {
 
     private allUnits: IUnit[] = [];
 
+    private minTile = 0;
+    private maxTile = 0;
+
+
     private house = document.createElement("img");
+
+    private imageManager = new ImageManager();
 
     private getTile = (x: number, y: number, addMissing: boolean): ITile | undefined => {
         var tile = this.gridTiles[x + "," + y];
@@ -69,12 +76,18 @@ export class GameBoard extends React.Component {
     private setTile = (x: number, y: number, tile: ITile) => {
         if (!this.gridTiles[x + "," + y]) {
             this.newTiles.push(tile);
+
+            if (x > this.maxTile) { this.maxTile = x; }
+            if (y > this.maxTile) { this.maxTile = y; }
+            if (x < this.minTile) { this.minTile = x; }
+            if (y < this.minTile) { this.minTile = y; }
         }
 
         this.gridTiles[x + "," + y] = tile;
     }
 
     private drawTile = (tile: ITile, ctx: CanvasRenderingContext2D) => {
+        let image = this.imageManager.GetImage(tile.type);
         switch (tile.type) {
             case "yourbusiness":
                 ctx.fillStyle = "purple";
@@ -86,6 +99,13 @@ export class GameBoard extends React.Component {
                 ctx.fillStyle = "darkgreen";
                 break;
             case "road":
+                // we should check the TYPE of road.
+                var t = this.getCloseNeighbors(tile.x, tile.y, false);
+                var c = this.getTypes(t);
+
+                if(c.road <= 2){image = this.imageManager.GetImage("road_straight")}
+                if(c.road+c.busyroad > 2){image = this.imageManager.GetImage("road_intersection")}
+
                 ctx.fillStyle = "grey";
                 break;
             case "busyroad":
@@ -111,19 +131,23 @@ export class GameBoard extends React.Component {
                 break;
         }
 
-        var vTileSize = this.tileSize * this.scale;
-        var vTileX = ((tile.x - this.centerX)) * vTileSize + (this.canvasSize / 2);
-        var vTileY = ((tile.y - this.centerY)) * vTileSize + (this.canvasSize / 2);
+        var orthoX = .81 * (.505 * tile.x - .505 * tile.y);
+        var orthoY = .81 * (.305 * tile.y + .305 * tile.x);
 
+        var vTileSize = this.tileSize * this.scale;
+        var vTileX = ((orthoX - this.centerX)) * vTileSize + (this.canvasSize / 2);
+        var vTileY = ((orthoY - this.centerY)) * vTileSize + (this.canvasSize / 2);
+
+        /*
         ctx.fillRect(
             Math.floor(vTileX),
             Math.floor(vTileY),
             Math.ceil(vTileSize),
             Math.ceil(vTileSize)
-        );
+        );*/
 
-        if(tile.type == "house"){
-            ctx.drawImage(this.house, vTileX, vTileY, vTileSize, vTileSize);
+        if (image) {
+            ctx.drawImage(image, vTileX, vTileY, vTileSize, vTileSize);
         }
     }
 
@@ -466,14 +490,25 @@ export class GameBoard extends React.Component {
                     break;
             }
 
-            if (tile.type != initialType) {
-                this.drawTile(tile, this.ctx!);
-            }
+            //if (tile.type != initialType) {
+            //this.drawTile(tile, this.ctx!);
+            //}
         }
     }
 
     private drawAllTiles = () => {
-        this.allTiles.forEach(i => this.drawTile(i, this.ctx!));
+        console.log("drawing " + this.minTile + " to " + this.maxTile);
+        // order based on the location...
+        for (var x = this.minTile; x < this.maxTile; x++) {
+            for (var y = this.minTile; y < this.maxTile; y++) {
+                let t = this.getTile(x,y, false);
+                if(t){
+                    this.drawTile(t, this.ctx!);
+                }
+            }
+        }
+
+        //this.allTiles.forEach(i => this.drawTile(i, this.ctx!));
     }
 
     private addNewTiles = () => {
@@ -484,6 +519,8 @@ export class GameBoard extends React.Component {
     private runStep = () => {
         this.updateTiles();
         this.addNewTiles();
+
+        this.clearMap();
 
         if (this.currentSteps < this.generationSteps) {
             this.currentSteps++;
@@ -554,11 +591,11 @@ export class GameBoard extends React.Component {
 
             // BUY
             var business = neighbors.filter(n => !!n && n.type == "yourbusiness");
-            if(business.length > 0){
-                if(Math.random() < .35){
+            if (business.length > 0) {
+                if (Math.random() < .35) {
                     // sell!
                     // TODO: draw a line! 
-                    
+
                     var unitSpot = this.convertToScreenSpace(unit, .5, .5);
                     var businessSpot = this.convertToScreenSpace(business[0]!, .5, .5);
 
@@ -571,7 +608,7 @@ export class GameBoard extends React.Component {
                     this.ctx!.closePath();
 
                     this.money += 10;
-                    console.log("SOLD! $" +this.money);
+                    console.log("SOLD! $" + this.money);
                 }
             }
 
@@ -630,9 +667,9 @@ export class GameBoard extends React.Component {
                 if (counts["road"] + counts["busyroad"] > 0) {
                     onlyOneBusiness = true;
                     t.type = "yourbusiness";
-                    this.centerX = t.x;
-                    this.centerY = t.y;
-                    this.scale = 3;
+                    //this.centerX = t.x;
+                    //this.centerY = t.y;
+                    //this.scale = 3;
                 }
             }
         });
@@ -685,7 +722,7 @@ export class GameBoard extends React.Component {
         var vTileX = ((tile.x + offsetX - this.centerX)) * vTileSize + (this.canvasSize / 2);
         var vTileY = ((tile.y + offsetY - this.centerY)) * vTileSize + (this.canvasSize / 2);
 
-        return {x: vTileX, y: vTileY};
+        return { x: vTileX, y: vTileY };
     }
 
     private runDay = () => {
