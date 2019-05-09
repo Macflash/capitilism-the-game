@@ -492,13 +492,37 @@ export class GameBoard extends React.Component {
         }
     }
 
+    private drawAllRoads = () => {
+        this.allTiles.forEach(t => {
+            if(t.type == "road" || t.type == "busyroad"){
+                this.drawTile(t, this.ctx!);
+            }
+        })
+    }
+
     private drawAllTiles = () => {
+        var gridUnits: {[key:string]: IUnit[]} = {};
+        this.allUnits.forEach(u => {
+            let x = Math.round(u.x);
+            let y = Math.round(u.y);
+            var i = x + "," + y;
+
+            gridUnits[i] = gridUnits[i] || [];
+            gridUnits[i].push(u);
+        });
+
         // order based on the location...
         for (var x = this.minTile; x < this.maxTile; x++) {
             for (var y = this.minTile; y < this.maxTile; y++) {
                 let t = this.getTile(x, y, false);
-                if (t) {
+                if (t && t.type != "road" && t.type != "busyroad") {
                     this.drawTile(t, this.ctx!);
+                }
+
+                // get units left on this tile
+                var units = gridUnits[x + "," + y];
+                if(units){
+                    units.forEach(u => this.drawUnit(u, this.ctx!));
                 }
             }
         }
@@ -667,7 +691,7 @@ export class GameBoard extends React.Component {
 
                     this.centerX = t.x;
                     this.centerY = t.y;
-                    this.scale = 10;
+                    this.scale = 14;
                 }
             }
         });
@@ -683,7 +707,7 @@ export class GameBoard extends React.Component {
     }
 
     private drawAllUnits = () => {
-        this.allUnits.forEach(u => this.drawUnit(u, this.ctx!));
+        //this.allUnits.forEach(u => this.drawUnit(u, this.ctx!));
     }
 
     private animationsPerCarTile = 10;
@@ -740,6 +764,7 @@ export class GameBoard extends React.Component {
     private clearMap = () => {
         this.ctx!.fillStyle = "green";
         this.ctx!.fillRect(0, 0, this.canvasSize, this.canvasSize);
+        this.drawAllRoads();
         this.drawAllTiles();
         this.drawAllUnits();
 
