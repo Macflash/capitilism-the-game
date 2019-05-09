@@ -19,11 +19,13 @@ import car from "./images/car.png";
 import { Roads } from "./images/road";
 import { BusyRoads } from "./images/busyroad";
 import { Waters } from "./images/water";
+import { Cars } from "./images/car";
 
 const Images = {
     ...Roads,
     ...BusyRoads,
     ...Waters,
+    ...Cars,
 
     yourbusiness,
     car,

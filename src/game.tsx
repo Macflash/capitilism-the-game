@@ -21,6 +21,7 @@ type UnitType = "person" | "car";
 interface IUnit extends entity {
     type: UnitType;
 
+    direction?: string;
     nextTile?: ITile;
     lastTile: ITile;
 }
@@ -30,7 +31,7 @@ export class GameBoard extends React.Component {
     private money = 100;
 
     private currentSteps = 0;
-    private generationSteps = 100;
+    private generationSteps = 25;
 
     /** Starting size */
     private size = 50;
@@ -522,12 +523,20 @@ export class GameBoard extends React.Component {
                 // get units left on this tile
                 var units = gridUnits[x + "," + y];
                 if(units){
-                    units.forEach(u => this.drawUnit(u, this.ctx!));
+                    // TODO sort better!
+                    units.sort((a,b) => {
+                        if(a.x < b.x && a.y < b.y){
+                            return 1;
+                        }
+                        if(a.x > b.x || a.y > b.y){
+                            return -1;
+                        }
+
+                        return 0;
+                    }).forEach(u => this.drawUnit(u, this.ctx!));
                 }
             }
         }
-
-        //this.allTiles.forEach(i => this.drawTile(i, this.ctx!));
     }
 
     private addNewTiles = () => {
@@ -550,19 +559,37 @@ export class GameBoard extends React.Component {
             this.startRunningDay();
         }
     }
+    private carOffset = .07;
     private moveUnits = () => {
+        // but how to handle lane offset?
         this.allUnits.forEach(unit => {
             var stepSize = 1 / this.animationsPerCarTile;
             var goalX = unit.nextTile!.x;
             var goalY = unit.nextTile!.y;
-            //console.log("moving");
-            //console.log("unit: " + unit.x + "," + unit.y);
-            //console.log("goal: " + goalX + "," + goalY);
+
+            var xDir = Math.abs(goalX - unit.x) > Math.abs(goalY - unit.y);
+
+            if(unit.direction == "_1_0_0_0"){
+                goalY -= this.carOffset;
+            }
+            if(unit.direction == "_0_1_0_0"){
+                goalX += this.carOffset;
+            }
+            if(unit.direction == "_0_0_1_0"){
+                goalY += this.carOffset;
+            }
+            if(unit.direction == "_0_0_0_1"){
+                goalX -= this.carOffset;
+            }
+
+            // how to handle, corners and stuff like that?
 
             if (goalX >= unit.x + stepSize) {
+                if (xDir) {unit.direction = "_0_0_1_0";}
                 unit.x += stepSize;
             }
             else if (goalX <= unit.x - stepSize) {
+                if(xDir){unit.direction = "_1_0_0_0";}
                 unit.x -= stepSize;
             }
             else {
@@ -570,9 +597,11 @@ export class GameBoard extends React.Component {
             }
 
             if (goalY >= unit.y + stepSize) {
+                if(!xDir){unit.direction = "_0_0_0_1";}
                 unit.y += stepSize;
             }
             else if (goalY <= unit.y - stepSize) {
+                if(!xDir){unit.direction = "_0_1_0_0";}
                 unit.y -= stepSize;
             }
             else {
@@ -585,16 +614,29 @@ export class GameBoard extends React.Component {
         this.allUnits.forEach(unit => {
             // this is wrong for moving.
             // actually use the NEXT tile. since this is where it actually moved TO
-            //var unitX = Math.floor(unit.x);
-            //var unitY = Math.floor(unit.y);
+            //var unitX = Math.round(unit.x);
+            //var unitY = Math.round(unit.y);
 
             if (unit.nextTile) {
                 unit.x = unit.nextTile.x;
                 unit.y = unit.nextTile.y;
             }
 
-            var unitX = unit.x
+            var unitX = unit.x;
             var unitY = unit.y;
+            
+            if(unit.direction == "_1_0_0_0"){
+                unit.y -= this.carOffset;
+            }
+            if(unit.direction == "_0_1_0_0"){
+                unit.x += this.carOffset;
+            }
+            if(unit.direction == "_0_0_1_0"){
+                unit.y += this.carOffset;
+            }
+            if(unit.direction == "_0_0_0_1"){
+                unit.x -= this.carOffset;
+            }
 
             //console.log("deciding");
             //console.log("current: " + ((unit.nextTile && unit.nextTile.x) || "X") +"," + ((unit.nextTile && unit.nextTile.y) || "Y"));
@@ -606,7 +648,7 @@ export class GameBoard extends React.Component {
             var straightX = unitX + difX;
             var straightY = unitY + difY;
 
-            var neighbors = this.getCloseNeighbors(unit.x, unit.y, false);
+            var neighbors = this.getCloseNeighbors(unitX, unitY, false);
 
             // BUY
             var business = neighbors.filter(n => !!n && n.type == "yourbusiness");
@@ -658,6 +700,9 @@ export class GameBoard extends React.Component {
             //unit.y = unit.nextTile!.y;
 
             unit.lastTile = this.getTile(unitX, unitY, false)!;
+            if(!unit.lastTile){
+                console.log("no last tile!! at " + unitX)
+            }
 
         });
     }
@@ -702,7 +747,7 @@ export class GameBoard extends React.Component {
     private drawUnit = (unit: IUnit, ctx: CanvasRenderingContext2D) => {
         ctx.fillStyle = "magenta";
         var converted = this.convertToScreenSpace(unit);
-        let image = this.imageManager.GetImage("car");
+        let image = this.imageManager.GetImage("car" + unit.direction) || this.imageManager.GetImage("car");
         ctx.drawImage(image, converted.x, converted.y, converted.tileSize, converted.tileSize);
     }
 
@@ -710,7 +755,7 @@ export class GameBoard extends React.Component {
         //this.allUnits.forEach(u => this.drawUnit(u, this.ctx!));
     }
 
-    private animationsPerCarTile = 10;
+    private animationsPerCarTile = 15;
     private currentAnimationStep = 0;
 
     private convertToOrtho = (tile: entity) => {
