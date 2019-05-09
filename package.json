@@ -1,6 +1,7 @@
 {
+  "homepage": "https://macflash.github.io/capitilism-the-game/",
   "name": "capitilism-the-game",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "dependencies": {
     "@types/jest": "24.0.12",
@@ -38,7 +39,6 @@
       "last 1 chrome version",
       "last 1 firefox version",
       "last 1 safari version"
-    ],
-    "homepage": "http://macflash.github.io/capitilism-the-game"
+    ]
   }
 }
