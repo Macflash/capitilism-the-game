@@ -20,6 +20,11 @@ import transitionroad_0_1_0_0 from "./images/transitionroad/transitionroad_0_1_0
 import transitionroad_0_0_1_0 from "./images/transitionroad/transitionroad_0_0_1_0.png";
 import transitionroad_0_0_0_1 from "./images/transitionroad/transitionroad_0_0_0_1.png";
 
+// parking
+import parking_1_0_0_0 from "./images/parking/parking_1_0_0_0.png";
+import parking_0_1_0_0 from "./images/parking/parking_0_1_0_0.png";
+import parking_0_0_1_0 from "./images/parking/parking_0_0_1_0.png";
+import parking_0_0_0_1 from "./images/parking/parking_0_0_0_1.png";
 
 import car from "./images/car.png";
 
@@ -57,6 +62,10 @@ const Images = {
     transitionroad_0_1_0_0,
     transitionroad_0_0_1_0,
     transitionroad_0_0_0_1,
+    parking_1_0_0_0,
+    parking_0_1_0_0,
+    parking_0_0_1_0,
+    parking_0_0_0_1,
 }
 
 const elements: { [key: string]: HTMLImageElement } = {};
@@ -97,6 +106,6 @@ export type SupportedImages =
     "water" |
     "nature";
 
-export const GetImage = (name: SupportedImages) => {
+export const GetImage = (name: string | SupportedImages) => {
     return elements[name];
 }

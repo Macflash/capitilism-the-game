@@ -326,6 +326,9 @@ export class GameBoard extends React.Component {
 
             var neighbors = this.getNeighbors(tile.x, tile.y, tile.type != "empty");
             var counts = this.getTypes(neighbors);
+            
+            var closeneighbors = this.getCloseNeighbors(tile.x, tile.y, tile.type != "empty");
+            var closeCounts = this.getTypes(closeneighbors);
 
             var initialType = tile.type;
             switch (tile.type) {
@@ -405,6 +408,8 @@ export class GameBoard extends React.Component {
                         }
                     }
 
+                    // TODO, this should probably be removed if running during the game
+                    // Better to have them actualyl get money and pay rent and stuff maybe
                     else if (!counts["smallbusiness"] && !counts["apartment"]) {
                         if (Math.random() < .01) {
                             tile.type = "empty";
@@ -450,6 +455,14 @@ export class GameBoard extends React.Component {
                     break;
 
                 case "busyroad":
+                    if (closeCounts["busyroad"] == 0) {
+                        tile.type = "road";
+                    }
+
+                    if (closeCounts["road"] + closeCounts["busyroad"] == 0) {
+                        tile.type = "empty";
+                    }
+
                     if (counts["road"] + counts["busyroad"] == 8) {
                         if (Math.random() < .25) {
                             tile.type = "downtown";
@@ -458,11 +471,10 @@ export class GameBoard extends React.Component {
 
                     break;
                 case "road":
-                    if (counts["road"] + counts["busyroad"] == 0) {
-                        if (Math.random() < .5) {
-                            tile.type = "empty";
-                        }
+                    if (closeCounts["road"] + closeCounts["busyroad"] == 0) {
+                        tile.type = "empty";
                     }
+
                     if (counts["road"] + counts["busyroad"] == 8) {
                         if (Math.random() < .1) {
                             tile.type = "downtown";
@@ -726,7 +738,12 @@ export class GameBoard extends React.Component {
         var onlyOneCar = false;
         var onlyOneBusiness = false;
         this.allTiles.forEach(t => {
-            // just spawn one for now
+            // build all existing roads
+            if(t.type == "road" || t.type == "busyroad"){
+                t.construction = undefined;
+            }
+
+            // just spawn one car for now
             if (!onlyOneCar && t.type == "house") {
                 var neighbors = this.getCloseNeighbors(t.x, t.y, false);
                 var counts = this.getTypes(neighbors);
@@ -817,7 +834,6 @@ export class GameBoard extends React.Component {
             this.moveUnits();
         }
 
-
         this.currentAnimationStep++;
         if (this.currentAnimationStep > this.animationsPerCarTile) { this.currentAnimationStep = 0; this.currentDayStep++; }
         if (this.currentDayStep > this.stepsPerDay) { this.currentDayStep = 0; }
@@ -832,12 +848,38 @@ export class GameBoard extends React.Component {
         this.drawAllTiles();
     }
 
+    private onKeyDown = (ev: React.KeyboardEvent<HTMLDivElement>) => {
+        switch(ev.key){
+            case "z":
+                this.scale *= 1.5;
+            break;
+            case "x":
+                this.scale /= 1.5;
+            break;
+            case "ArrowRight":
+                this.centerX++;
+            break;
+            case "ArrowLeft":
+                this.centerX--;
+            break;
+            case "ArrowUp":
+                this.centerY--;
+            break;
+            case "ArrowDown":
+                this.centerY++;
+            break;
+            default:
+            console.log("No case registered for " + ev.key);
+            break;
+        }
+    }
+
     private dragging = false;
     private startX = 0;
     private startY = 0;
 
     render() {
-        return <div>
+        return <div tabIndex={0} onKeyDown={this.onKeyDown}>
             <div>
                 <button onClick={() => { this.runDay() }}>STEP</button>
                 <button onClick={() => { this.scale *= 1.1; this.clearMap(); }}>+</button>

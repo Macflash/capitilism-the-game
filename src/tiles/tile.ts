@@ -13,6 +13,17 @@ export interface ITile extends entity {
 export type Neighbors = (ITile | undefined)[];
 
 export class Tile {
+    public static CountTileTypes(types: TileType[], neighbors: Neighbors): number {
+        let count = 0;
+        neighbors.forEach(t => {
+            if (t && types.includes(t.type)) {
+                count++;
+            }
+        })
+
+        return count;
+    }
+
     public static GetSingleTileExtension(type: TileType, neighbors: Neighbors): string {
         var extension: string[] = [];
         neighbors.forEach(t => {
