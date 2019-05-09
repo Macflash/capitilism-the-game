@@ -322,7 +322,6 @@ export class GameBoard extends React.Component {
     }
 
     private updateTiles = () => {
-        // eslint-disable-next-line
         for (var tile of this.allTiles) {
 
             var neighbors = this.getNeighbors(tile.x, tile.y, tile.type != "empty");
@@ -768,9 +767,8 @@ export class GameBoard extends React.Component {
         ctx.drawImage(image, converted.x, converted.y, converted.tileSize, converted.tileSize);
     }
 
-    private drawAllUnits = () => {
-        //this.allUnits.forEach(u => this.drawUnit(u, this.ctx!));
-    }
+    private stepsPerDay = 25;
+    private currentDayStep = 0;
 
     private animationsPerCarTile = 10;
     private currentAnimationStep = 0;
@@ -805,7 +803,13 @@ export class GameBoard extends React.Component {
     }
 
     private runDay = () => {
+        if(this.currentDayStep == 0){
+            this.updateTiles();
+            this.addNewTiles();
+        }
+        
         this.clearMap();
+
         if (this.currentAnimationStep == 0) {
             this.updateUnits();
         }
@@ -813,12 +817,10 @@ export class GameBoard extends React.Component {
             this.moveUnits();
         }
 
-        // do the shooty thing?
 
         this.currentAnimationStep++;
-        if (this.currentAnimationStep > this.animationsPerCarTile) { this.currentAnimationStep = 0; }
-
-        // animate X times?
+        if (this.currentAnimationStep > this.animationsPerCarTile) { this.currentAnimationStep = 0; this.currentDayStep++; }
+        if (this.currentDayStep > this.stepsPerDay) { this.currentDayStep = 0; }
 
         setTimeout(this.runDay, 10);
     }
@@ -828,9 +830,6 @@ export class GameBoard extends React.Component {
         this.ctx!.fillRect(0, 0, this.canvasSize, this.canvasSize);
         this.drawAllRoads();
         this.drawAllTiles();
-        this.drawAllUnits();
-
-        // draw circle around the base
     }
 
     private dragging = false;
