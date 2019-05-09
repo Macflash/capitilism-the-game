@@ -4,6 +4,10 @@ export type TileType = "yourbusiness" | "empty" | "busyroad" | "road" | "house" 
 
 export interface ITile extends entity {
     type: TileType,
+
+    // tile could also store, what IMAGE it should show.
+    construction?: "small" | "medium" | "large",
+    image?: string, // for example, different IMAGES for houses, but it should be consistent
 }
 
 export type Neighbors = (ITile | undefined)[];

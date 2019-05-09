@@ -1,7 +1,8 @@
 import React from 'react';
 import { ImageManager } from './imageManager';
-import { Road } from './tiles/road';
+import { Road, BusyRoad } from './tiles/road';
 import { ITile, Tile, TileType } from './tiles/tile';
+import { Construction } from './tiles/construction';
 
 export interface entity {
     x: number;
@@ -67,6 +68,9 @@ export class GameBoard extends React.Component {
 
     private setTile = (x: number, y: number, tile: ITile) => {
         if (!this.gridTiles[x + "," + y]) {
+
+            //Construction.BuildNewTile(tile);
+
             this.newTiles.push(tile);
 
             if (x > this.maxTile) { this.maxTile = x; }
@@ -82,7 +86,7 @@ export class GameBoard extends React.Component {
         var t = this.getCloseNeighbors(tile.x, tile.y, false);
 
         let image = this.imageManager.GetImage(tile.type + "_" + Tile.GetSingleTileExtension(tile.type, t))
-        || this.imageManager.GetImage(tile.type);
+            || this.imageManager.GetImage(tile.type);
         switch (tile.type) {
             case "yourbusiness":
                 ctx.fillStyle = "purple";
@@ -94,12 +98,11 @@ export class GameBoard extends React.Component {
                 ctx.fillStyle = "darkgreen";
                 break;
             case "road":
-                // we should check the TYPE of road.
                 image = Road.GetImage(t);
-
                 ctx.fillStyle = "grey";
                 break;
             case "busyroad":
+                image = BusyRoad.GetImage(t);
                 ctx.fillStyle = "#555";
                 break;
             case "house":
@@ -120,6 +123,10 @@ export class GameBoard extends React.Component {
             default:
                 ctx.fillStyle = "green";
                 break;
+        }
+
+        if (tile.construction) {
+            image = this.imageManager.GetImage("construction_" + tile.construction);
         }
 
         var orthoX = .81 * (.505 * tile.x - .505 * tile.y);
@@ -308,6 +315,7 @@ export class GameBoard extends React.Component {
     private updateTiles = () => {
         // eslint-disable-next-line
         for (var tile of this.allTiles) {
+
             var neighbors = this.getNeighbors(tile.x, tile.y, tile.type != "empty");
             var counts = this.getTypes(neighbors);
 
@@ -482,9 +490,13 @@ export class GameBoard extends React.Component {
                     break;
             }
 
-            //if (tile.type != initialType) {
-            //this.drawTile(tile, this.ctx!);
-            //}
+            if (tile.type == initialType) {
+                Construction.UpdateTileConstruction(tile);
+            }
+            else {
+                Construction.BuildNewTile(tile);
+            }
+
         }
     }
 
