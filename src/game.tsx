@@ -31,7 +31,7 @@ export class GameBoard extends React.Component {
     private money = 100;
 
     private currentSteps = 0;
-    private generationSteps = 25;
+    private generationSteps = 100;
 
     /** Starting size */
     private size = 50;
@@ -139,6 +139,22 @@ export class GameBoard extends React.Component {
 
         if (image) {
             ctx.drawImage(image, converted.x, converted.y, converted.tileSize, converted.tileSize);
+
+            // more road stuff?
+            if(tile.type == "road"){
+                if(t[0] && t[0]!.type == "busyroad"){
+                    ctx.drawImage(this.imageManager.GetImage("transitionroad_1_0_0_0"), converted.x, converted.y, converted.tileSize, converted.tileSize);
+                }
+                if(t[1] && t[1]!.type == "busyroad"){
+                    ctx.drawImage(this.imageManager.GetImage("transitionroad_0_1_0_0"), converted.x, converted.y, converted.tileSize, converted.tileSize);
+                }
+                if(t[2] && t[2]!.type == "busyroad"){
+                    ctx.drawImage(this.imageManager.GetImage("transitionroad_0_0_1_0"), converted.x, converted.y, converted.tileSize, converted.tileSize);
+                }
+                if(t[3] && t[3]!.type == "busyroad"){
+                    ctx.drawImage(this.imageManager.GetImage("transitionroad_0_0_0_1"), converted.x, converted.y, converted.tileSize, converted.tileSize);
+                }
+            }
         }
     }
 
@@ -681,7 +697,7 @@ export class GameBoard extends React.Component {
                 && n.y == straightY);
 
             var nextRoad = unit.lastTile;
-            if (straightRoad[0] && Math.random() < .9) {
+            if (straightRoad[0] && Math.random() < .75) {
                 nextRoad = straightRoad[0]!;
             }
             else {
@@ -731,6 +747,7 @@ export class GameBoard extends React.Component {
                 if (counts["road"] + counts["busyroad"] > 0) {
                     onlyOneBusiness = true;
                     t.type = "yourbusiness";
+                    t.construction = undefined;
 
                     var s = this.convertToScreenSpace(t);
 
@@ -755,7 +772,7 @@ export class GameBoard extends React.Component {
         //this.allUnits.forEach(u => this.drawUnit(u, this.ctx!));
     }
 
-    private animationsPerCarTile = 15;
+    private animationsPerCarTile = 10;
     private currentAnimationStep = 0;
 
     private convertToOrtho = (tile: entity) => {

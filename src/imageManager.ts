@@ -14,12 +14,21 @@ import construction_small from "./images/construction/construction_small.png";
 import construction_medium from "./images/construction/construction_medium.png";
 import construction_large from "./images/construction/construction_large.png";
 
+// transitions
+import transitionroad_1_0_0_0 from "./images/transitionroad/transitionroad_1_0_0_0.png";
+import transitionroad_0_1_0_0 from "./images/transitionroad/transitionroad_0_1_0_0.png";
+import transitionroad_0_0_1_0 from "./images/transitionroad/transitionroad_0_0_1_0.png";
+import transitionroad_0_0_0_1 from "./images/transitionroad/transitionroad_0_0_0_1.png";
+
+
 import car from "./images/car.png";
 
 import { Roads } from "./images/road";
 import { BusyRoads } from "./images/busyroad";
 import { Waters } from "./images/water";
 import { Cars } from "./images/car";
+
+
 
 const Images = {
     ...Roads,
@@ -43,6 +52,11 @@ const Images = {
     construction_small,
     construction_medium,
     construction_large,
+
+    transitionroad_1_0_0_0,
+    transitionroad_0_1_0_0,
+    transitionroad_0_0_1_0,
+    transitionroad_0_0_0_1,
 }
 
 const elements: { [key: string]: HTMLImageElement } = {};
