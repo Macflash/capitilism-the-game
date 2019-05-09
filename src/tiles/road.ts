@@ -25,23 +25,4 @@ export class BusyRoad {
         return GetImage(("busyroad_"+ext) as SupportedImages)
          || GetImage("busyroad_1_1_1_1" as SupportedImages);
     }
-
-    public static AddTransitions(tile: ITile, neighbors: (ITile | undefined)[], ctx: CanvasRenderingContext2D): void {
-        if(tile.type == "road"){
-            var converted = this.convertToScreenSpace(tile, 0, 0);
-            var ext = Tile.GetSingleTileExtension("busyroad", t);
-
-            if(neighbors[0] && neighbors[0]!.type == "busyroad"){
-                ctx.drawImage(img, converted.x, converted.y, converted.tileSize, converted.tileSize);
-            }
-
-            if(ext != "0_0_0_0"){
-                var img = GetImage("transitionroad_" + ext);
-                if(img){
-                    ctx.drawImage(img, converted.x, converted.y, converted.tileSize, converted.tileSize);
-                }
-            }
-        }
-    }
-
 }
