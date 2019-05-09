@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/4.3.0/workbox-sw.js");
 
 importScripts(
-  "/capitilism-the-game/precache-manifest.6f8c5a216b0dba74a1637354b5c792e6.js"
+  "/capitilism-the-game/precache-manifest.ee040951860773883cabacc60828c6b3.js"
 );
 
 self.addEventListener('message', (event) => {

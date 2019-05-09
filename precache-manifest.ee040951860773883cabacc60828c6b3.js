@@ -1,15 +1,15 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "8f4a49efa7ae9282e60cb66115574dfa",
+    "revision": "7557e76fc36dbe8ba2b79da584603336",
     "url": "/capitilism-the-game/index.html"
   },
   {
-    "revision": "f757a1d76fd533fdbcc4",
-    "url": "/capitilism-the-game/static/js/2.eade187b.chunk.js"
+    "revision": "998f247f7f24305f9d1b",
+    "url": "/capitilism-the-game/static/js/2.ad52f3df.chunk.js"
   },
   {
-    "revision": "0f1fec5968e22dd87ac6",
-    "url": "/capitilism-the-game/static/js/main.f03cfcb7.chunk.js"
+    "revision": "aa8c0fae804ec0cfc5b1",
+    "url": "/capitilism-the-game/static/js/main.4bf3aa29.chunk.js"
   },
   {
     "revision": "71ce74a442439512611c",
