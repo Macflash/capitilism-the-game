@@ -921,6 +921,7 @@ export class GameBoard extends React.Component {
                         setTimeout(this.runStep, 50);
                     }
                 }} />
+                <br/>
                 This game is open source. <a href="https://github.com/Macflash/capitilism-the-game">Learn more</a>
         </div>;
     }
