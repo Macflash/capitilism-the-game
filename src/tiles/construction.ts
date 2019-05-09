@@ -26,13 +26,19 @@ export class Construction {
 
         // construction is finished
         if(tile.construction == max){
-            tile.construction = undefined;
+            if(Math.random() < .3){
+                tile.construction = undefined;
+            }
         }
         else if(tile.construction == "small"){
-            tile.construction = "medium";
+            if(Math.random() < .2){
+                tile.construction = "medium";
+            }
         }
         else if(tile.construction == "medium"){
-            tile.construction = "large";
+            if(Math.random() < .05){
+                tile.construction = "large";
+            }
         }
     }
 }

@@ -51,9 +51,6 @@ export class GameBoard extends React.Component {
     private minTile = 0;
     private maxTile = 0;
 
-
-    private house = document.createElement("img");
-
     private imageManager = new ImageManager();
 
     private getTile = (x: number, y: number, addMissing: boolean): ITile | undefined => {
@@ -129,12 +126,7 @@ export class GameBoard extends React.Component {
             image = this.imageManager.GetImage("construction_" + tile.construction);
         }
 
-        var orthoX = .81 * (.505 * tile.x - .505 * tile.y);
-        var orthoY = .81 * (.305 * tile.y + .305 * tile.x);
-
-        var vTileSize = this.tileSize * this.scale;
-        var vTileX = ((orthoX - this.centerX)) * vTileSize + (this.canvasSize / 2);
-        var vTileY = ((orthoY - this.centerY)) * vTileSize + (this.canvasSize / 2);
+        var converted = this.convertToScreenSpace(tile, 0, 0);
 
         /*
         ctx.fillRect(
@@ -145,7 +137,7 @@ export class GameBoard extends React.Component {
         );*/
 
         if (image) {
-            ctx.drawImage(image, vTileX, vTileY, vTileSize, vTileSize);
+            ctx.drawImage(image, converted.x, converted.y, converted.tileSize, converted.tileSize);
         }
     }
 
@@ -234,8 +226,8 @@ export class GameBoard extends React.Component {
         console.log(i + "," + j);
         console.log(i2 + "," + j2);
 
-        this.centerX = j;
-        this.centerY = i;
+        this.centerX = i;
+        this.centerY = j;
 
         for (var x = 0; x < this.size; x++) {
             for (var y = 0; y < this.size; y++) {
@@ -501,7 +493,6 @@ export class GameBoard extends React.Component {
     }
 
     private drawAllTiles = () => {
-        console.log("drawing " + this.minTile + " to " + this.maxTile);
         // order based on the location...
         for (var x = this.minTile; x < this.maxTile; x++) {
             for (var y = this.minTile; y < this.maxTile; y++) {
@@ -596,12 +587,12 @@ export class GameBoard extends React.Component {
             // BUY
             var business = neighbors.filter(n => !!n && n.type == "yourbusiness");
             if (business.length > 0) {
-                if (Math.random() < .35) {
+                if (Math.random() < 11) {
                     // sell!
                     // TODO: draw a line! 
 
-                    var unitSpot = this.convertToScreenSpace(unit, .5, .5);
-                    var businessSpot = this.convertToScreenSpace(business[0]!, .5, .5);
+                    var unitSpot = this.convertToScreenSpace(unit,2,1);
+                    var businessSpot = this.convertToScreenSpace(business[0]!, 2, 1);
 
                     this.ctx!.beginPath();
                     this.ctx!.lineWidth = 2;
@@ -671,9 +662,12 @@ export class GameBoard extends React.Component {
                 if (counts["road"] + counts["busyroad"] > 0) {
                     onlyOneBusiness = true;
                     t.type = "yourbusiness";
-                    //this.centerX = t.x;
-                    //this.centerY = t.y;
-                    //this.scale = 3;
+
+                    var s = this.convertToScreenSpace(t);
+
+                    this.centerX = t.x;
+                    this.centerY = t.y;
+                    this.scale = 10;
                 }
             }
         });
@@ -683,35 +677,9 @@ export class GameBoard extends React.Component {
 
     private drawUnit = (unit: IUnit, ctx: CanvasRenderingContext2D) => {
         ctx.fillStyle = "magenta";
-        var vTileSize = this.tileSize * this.scale;
-
-        var offsetX = .5;
-        var offsetY = .5;
-        /*
-                if(unit.nextTile && unit.nextTile.x > unit.lastTile.x){
-                    // going right, offset y
-                    offsetY = .75;
-                }
-                else if(unit.nextTile && unit.nextTile.x < unit.lastTile.x){
-                    // going left, offset y
-                    offsetY = .25;
-                }
-                
-                if(unit.nextTile && unit.nextTile.y > unit.lastTile.y){
-                    // going up, offset y
-                    offsetX = .75;
-                }
-                else if(unit.nextTile && unit.nextTile.y < unit.lastTile.y){
-                    // going left, offset y
-                    offsetX = .25;
-                }
-        */
-
-        var vTileX = ((unit.x + offsetX - this.centerX)) * vTileSize + (this.canvasSize / 2);
-        var vTileY = ((unit.y + offsetY - this.centerY)) * vTileSize + (this.canvasSize / 2);
-
-        var vRadius = unit.type == "car" ? .3 * this.tileSize : .1 * this.tileSize;
-        ctx.fillRect(vTileX, vTileY, vRadius, vRadius);
+        var converted = this.convertToScreenSpace(unit);
+        let image = this.imageManager.GetImage("car");
+        ctx.drawImage(image, converted.x, converted.y, converted.tileSize, converted.tileSize);
     }
 
     private drawAllUnits = () => {
@@ -721,12 +689,33 @@ export class GameBoard extends React.Component {
     private animationsPerCarTile = 10;
     private currentAnimationStep = 0;
 
-    private convertToScreenSpace = (tile: entity, offsetX: number = 0, offsetY: number = 0): entity => {
-        var vTileSize = this.tileSize * this.scale;
-        var vTileX = ((tile.x + offsetX - this.centerX)) * vTileSize + (this.canvasSize / 2);
-        var vTileY = ((tile.y + offsetY - this.centerY)) * vTileSize + (this.canvasSize / 2);
+    private convertToOrtho = (tile: entity) => {
+        var x = .81 * (.505 * tile.x - .505 * tile.y);
+        var y = .81 * (.305 * tile.y + .305 * tile.x);
+        return { x, y };
+    }
 
-        return { x: vTileX, y: vTileY };
+
+    private convertFromOrtho = (tile: entity) => {
+        var x = .81 * ((1 / .505) * tile.x + (1 / .505) * tile.y);
+        var y = .81 * ((1 / .305) * tile.y - (1 / .305) * tile.x);
+        return { x, y };
+    }
+
+    private convertToScreenSpace = (tile: entity, offsetX: number = 0, offsetY: number = 0) => {
+        var vTileSize = this.tileSize * this.scale;
+        //var vTileX = ((tile.x + offsetX - this.centerX)) * vTileSize + (this.canvasSize / 2);
+        //var vTileY = ((tile.y + offsetY - this.centerY)) * vTileSize + (this.canvasSize / 2);
+
+        var t = { x: tile.x + offsetX, y: tile.y + offsetY };
+        var ortho = this.convertToOrtho(t)
+        var center = this.convertToOrtho({ x: this.centerX, y: this.centerY });
+
+        var vTileSize = this.tileSize * this.scale;
+        var vTileX = ((ortho.x - center.x)) * vTileSize + (this.canvasSize / 2);
+        var vTileY = ((ortho.y - center.y)) * vTileSize + (this.canvasSize / 2);
+
+        return { x: vTileX, y: vTileY, tileSize: vTileSize };
     }
 
     private runDay = () => {
@@ -773,8 +762,15 @@ export class GameBoard extends React.Component {
                 onMouseUp={ev => { this.dragging = false; }}
                 onMouseMove={ev => {
                     if (this.dragging) {
-                        this.centerX += (this.startX - ev.screenX) / (this.scale * this.tileSize);
-                        this.centerY += (this.startY - ev.screenY) / (this.scale * this.tileSize);
+                        var movement = {
+                            x: (this.startX - ev.screenX) / (this.scale * this.tileSize),
+                            y: (this.startY - ev.screenY) / (this.scale * this.tileSize)
+                        };
+
+                        var scaled = this.convertFromOrtho(movement);
+
+                        this.centerX += scaled.x;
+                        this.centerY += scaled.y;
                         this.startX = ev.screenX; this.startY = ev.screenY;
                         this.clearMap();
                     }

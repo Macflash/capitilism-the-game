@@ -7,79 +7,26 @@ import smallbusiness from "./images/store.png";
 import shoppingcenter from "./images/mall.png";
 import water from "./images/water.png";
 import nature from "./images/tree.png";
-import busyroad from "./images/busy_4.png";
-
-// Busy roads
-/*
-do single entry busy roads make sense? I don't think so...
-import busyroad_1_0_0_0 from "./images/busyroad/busyroad_1_0_0_0.png";
-import busyroad_0_1_0_0 from "./images/busyroad/busyroad_0_1_0_0.png";
-import busyroad_0_0_1_0 from "./images/busyroad/busyroad_0_0_1_0.png";
-import busyroad_0_0_0_1 from "./images/busyroad/busyroad_0_0_0_1.png";
-*/
-import busyroad_1_1_1_1 from "./images/busyroad/busyroad_1_1_1_1.png";
-
-import busyroad_0_1_1_1 from "./images/busyroad/busyroad_0_1_1_1.png";
-import busyroad_1_0_1_1 from "./images/busyroad/busyroad_1_0_1_1.png";
-import busyroad_1_1_0_1 from "./images/busyroad/busyroad_1_1_0_1.png";
-import busyroad_1_1_1_0 from "./images/busyroad/busyroad_1_1_1_0.png";
-
-import busyroad_0_0_1_1 from "./images/busyroad/busyroad_0_0_1_1.png";
-import busyroad_0_1_1_0 from "./images/busyroad/busyroad_0_1_1_0.png";
-import busyroad_1_1_0_0 from "./images/busyroad/busyroad_1_1_0_0.png";
-import busyroad_1_0_0_1 from "./images/busyroad/busyroad_1_0_0_1.png";
-
-import busyroad_1_0_1_0 from "./images/busyroad/busyroad_1_0_1_0.png";
-import busyroad_0_1_0_1 from "./images/busyroad/busyroad_0_1_0_1.png";
-
-// ROADS
-import road_1_1_1_1 from "./images/road/road_1_1_1_1.png";
-
-import road_1_0_0_0 from "./images/road/road_1_0_0_0.png";
-import road_0_1_0_0 from "./images/road/road_0_1_0_0.png";
-import road_0_0_1_0 from "./images/road/road_0_0_1_0.png";
-import road_0_0_0_1 from "./images/road/road_0_0_0_1.png";
-
-import road_0_1_1_1 from "./images/road/road_0_1_1_1.png";
-import road_1_0_1_1 from "./images/road/road_1_0_1_1.png";
-import road_1_1_0_1 from "./images/road/road_1_1_0_1.png";
-import road_1_1_1_0 from "./images/road/road_1_1_1_0.png";
-
-import road_0_0_1_1 from "./images/road/road_0_0_1_1.png";
-import road_0_1_1_0 from "./images/road/road_0_1_1_0.png";
-import road_1_1_0_0 from "./images/road/road_1_1_0_0.png";
-import road_1_0_0_1 from "./images/road/road_1_0_0_1.png";
-
-import road_1_0_1_0 from "./images/road/road_1_0_1_0.png";
-import road_0_1_0_1 from "./images/road/road_0_1_0_1.png";
-
-// WATER
-import water_1_1_1_1 from "./images/water/water_1_1_1_1.png";
-
-import water_1_0_0_0 from "./images/water/water_1_0_0_0.png";
-import water_0_1_0_0 from "./images/water/water_0_1_0_0.png";
-import water_0_0_1_0 from "./images/water/water_0_0_1_0.png";
-import water_0_0_0_1 from "./images/water/water_0_0_0_1.png";
-
-import water_0_1_1_1 from "./images/water/water_0_1_1_1.png";
-import water_1_0_1_1 from "./images/water/water_1_0_1_1.png";
-import water_1_1_0_1 from "./images/water/water_1_1_0_1.png";
-import water_1_1_1_0 from "./images/water/water_1_1_1_0.png";
-
-import water_0_0_1_1 from "./images/water/water_0_0_1_1.png";
-import water_0_1_1_0 from "./images/water/water_0_1_1_0.png";
-import water_1_1_0_0 from "./images/water/water_1_1_0_0.png";
-import water_1_0_0_1 from "./images/water/water_1_0_0_1.png";
-
-import water_1_0_1_0 from "./images/water/water_1_0_1_0.png";
-import water_0_1_0_1 from "./images/water/water_0_1_0_1.png";
+import yourbusiness from "./images/yourbusiness.png";
 
 // construction
 import construction_small from "./images/construction/construction_small.png";
 import construction_medium from "./images/construction/construction_medium.png";
 import construction_large from "./images/construction/construction_large.png";
 
+import car from "./images/car.png";
+
+import { Roads } from "./images/road";
+import { BusyRoads } from "./images/busyroad";
+import { Waters } from "./images/water";
+
 const Images = {
+    ...Roads,
+    ...BusyRoads,
+    ...Waters,
+
+    yourbusiness,
+    car,
     tile,
     apartment,
     downtown,
@@ -87,56 +34,8 @@ const Images = {
     mall,
     smallbusiness,
     shoppingcenter,
-    busyroad,
     water,
     nature,
-
-    // Basic roads
-    road_1_1_1_1,
-    road_0_1_1_1,
-    road_1_0_1_1,
-    road_1_1_0_1,
-    road_1_1_1_0,
-    road_0_0_1_1,
-    road_0_1_1_0,
-    road_1_1_0_0,
-    road_1_0_0_1,
-    road_1_0_1_0,
-    road_0_1_0_1,
-    road_1_0_0_0,
-    road_0_1_0_0,
-    road_0_0_1_0,
-    road_0_0_0_1,
-
-    // busy roads
-    busyroad_1_1_1_1,
-    busyroad_0_1_1_1,
-    busyroad_1_0_1_1,
-    busyroad_1_1_0_1,
-    busyroad_1_1_1_0,
-    busyroad_0_0_1_1,
-    busyroad_0_1_1_0,
-    busyroad_1_1_0_0,
-    busyroad_1_0_0_1,
-    busyroad_1_0_1_0,
-    busyroad_0_1_0_1,
-
-    // Basic water
-    water_1_1_1_1,
-    water_0_1_1_1,
-    water_1_0_1_1,
-    water_1_1_0_1,
-    water_1_1_1_0,
-    water_0_0_1_1,
-    water_0_1_1_0,
-    water_1_1_0_0,
-    water_1_0_0_1,
-    water_1_0_1_0,
-    water_0_1_0_1,
-    water_1_0_0_0,
-    water_0_1_0_0,
-    water_0_0_1_0,
-    water_0_0_0_1,
 
     //construction
     construction_small,
@@ -148,7 +47,6 @@ const elements: { [key: string]: HTMLImageElement } = {};
 
 export class ImageManager {
     constructor() {
-
     }
 
     public static createImage = (name: string): HTMLImageElement => {
